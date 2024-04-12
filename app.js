@@ -2,7 +2,7 @@ const mysql = require('mysql2')
 const express = require('express')
 const dbConnect = require('./mysql/dbConnect')
 const dbQuery = require('./mysql/dbQuery')
-const {writeToExcel} = require('./excel/excel')
+const {writeToExcel} = require('./excel/excel1')
 const app = express()
 
 app.use(express.json()) // for parsing application/json
@@ -17,14 +17,15 @@ app.get('/test',(req,res)=>{
 app.get('/select',(req,res)=>{
     const {startTs,endTs} = req.query
     const key = req.query.key.split(',')
+    console.log(key)
     dbConnect.query(`SELECT Timestamp,${key.join(', ')} FROM stock WHERE Timestamp >= ? AND Timestamp <= ?`,[startTs, endTs],async(err,result)=>{
         if(err) return res.json({message:"something went wrong",err})
         try{
 
-            for (const item of result){
-                await writeToExcel(item,key)
+            for (const data of result){
+                await writeToExcel(data)
         }
-        res.json({message:"success"})
+        res.json({message:"success",result:result})
         }catch(err){
             res.json({message:err})
         }
